@@ -6,3 +6,8 @@
 
 EMS系统与爆震传感器：EMS（Engine Management System）系统可以实时检测爆震传感器的信号，并计算出早燃强度用于早燃识别。系统识别到早燃后，需要通过合理的方式避免后续可能的早燃问题
 （https://www.ibmwclub.com/n/35511）
+
+
+技术路线：
+https://m.evpartner.com/news/detail-23212.html
+https://mt.sohu.com/20161027/n471512692.shtml
