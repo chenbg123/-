@@ -100,14 +100,19 @@ print("Test data shape:", X_test.shape)
 
 # 定义自动编码器模型
 def autoencoder_model(X):
-    inputs = Input(shape=(X.shape[1], X.shape[2]))
+    inputs = Input(shape=(X.shape[1], X.shape[2])) # 输入层，其形状是(时间步长, 特征数量)，其中X.shape[1]是时间步长，X.shape[2]是特征数量。
+
+    # 定义编码器层（L1和L2）:将输入数据转换为低维表示。第一个LSTM层（L1）具有16个单元，并返回每个时间步长的输出序列（因为return_sequences=True）。第二个LSTM层（L2）具有4个单元，并且只返回最后一个时间步长的输出。
+    
     L1 = LSTM(16, activation='relu', return_sequences=True,
               kernel_regularizer=regularizers.l2(0.00))(inputs)
     L2 = LSTM(4, activation='relu', return_sequences=False)(L1)
-    L3 = RepeatVector(X.shape[1])(L2)  # 使用RepeatVector将编码器的输出复制N份作为解码器的输入
-    L4 = LSTM(4, activation='relu', return_sequences=True)(L3)
-    L5 = LSTM(16, activation='relu', return_sequences=True)(L4)
-    output = TimeDistributed(Dense(X.shape[2]))(L5)
+
+    # 定义解码器层（L3至L5）:解码器的目的是将编码器的低维表示映射回原始数据空间。RepeatVector层将编码器的输出复制N次，其中N是时间步长。然后通过两个LSTM层和一个全连接层（Dense）来重建原始数据。
+    L3 = RepeatVector(X.shape[1])(L2)  # 使用RepeatVector将编码器的输出复制N份作为解码器的输入,它将长度为4的编码器输出向量复制了X.shape[1]（时间步长）次，以匹配原始时间序列的长度。
+    L4 = LSTM(4, activation='relu', return_sequences=True)(L3) # 这一层是解码器的第一个LSTM层，其目的是在解码器中再次提取时间序列的特征。它以编码器输出的多次复制作为输入，然后生成一个新的时间序列。
+    L5 = LSTM(16, activation='relu', return_sequences=True)(L4) # 这是解码器的第二个LSTM层，其目的是进一步处理解码器的输出，以获取更高级别的时间序列表示。
+    output = TimeDistributed(Dense(X.shape[2]))(L5) #将解码器的输出映射回原始数据空间，完成重建操作。
     model = Model(inputs=inputs, outputs=output)
     return model
 
