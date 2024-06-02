@@ -154,8 +154,9 @@ plt.xlim([0.0, .5])
 plt.show()
 
 # 计算测试集的损失
-X_pred = model.predict(X_test)
-X_pred = X_pred.reshape(X_pred.shape[0], X_pred.shape[2])
+X_pred = model.predict(X_test) #使用已经训练好的自动编码器模型对测试集 (X_test) 进行预测。预测的结果 X_pred 是模型根据输入数据 X_test 重构出的数据。
+X_pred = X_pred.reshape(X_pred.shape[0], X_pred.shape[2]) ## 将预测结果的形状调整为原始输入数据的形状，将预测结果的形状从 (样本数, 1, 特征数) 调整为 (样本数, 特征数)，这样更容易与原始数据进行比较。
+# 将预测结果转换为DataFrame格式，并设置列名与原始测试数据一致
 X_pred = pd.DataFrame(X_pred, columns=test.columns)
 X_pred.index = test.index
 
@@ -173,7 +174,7 @@ X_pred_train = pd.DataFrame(X_pred_train, columns=train.columns)
 X_pred_train.index = train.index
 
 scored_train = pd.DataFrame(index=train.index)
-scored_train['Loss_mae'] = np.mean(np.abs(X_pred_train - Xtrain), axis=1)
+scored_train['Loss_mae'] = np.mean(np.abs(X_pred_train - Xtrain), axis=1) ## 计算每个样本的重构误差（平均绝对误差），并存储在scored['Loss_mae']列中，计算每个样本的重构误差，这里使用的是平均绝对误差（MAE）。误差越大，表示模型重构该样本的效果越差，可能存在异常。
 
 """
 基于统计特性：
@@ -226,6 +227,6 @@ plt.show()
 model.save("Cloud_model.h5")
 print("Model saved")
 
-
+#模型预测的是测试数据的重构值，即模型试图将输入数据还原回输入前的状态。然后通过计算原始测试数据与重构数据之间的误差（重构误差），来识别哪些数据点可能存在异常。如果某个数据点的重构误差超过设定的阈值，则该数据点被认为是异常的。在实际应用中，阈值的选择可以通过分析训练集的重构误差分布来自动确定。例如，可以选择某个百分位数（如95百分位数）作为阈值，以提高模型的异常检测能力和准确性。
 
 
